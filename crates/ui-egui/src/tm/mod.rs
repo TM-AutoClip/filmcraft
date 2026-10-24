@@ -1,8 +1,8 @@
 //! TM AutoClip yerel yaması — FilmCraft (11 Eki 2026). Upstream'e dokunuş: `lib.rs` → `pub mod tm;` + her karede
 //! `tm::kare`, `menus.rs` → menü öğeleri + çalıştırma, `panels/export_mode.rs` → düğme, `apps/filmcraft/src/main.rs` → kapı.
 //!
-//! - Akış kipinde Dışa Aktar penceresinde "Bitir ve TM AutoClip'e gönder": geçerli dışa aktarma ayarlarıyla oturumun
-//!   beklenen çıktı yoluna (uzantı ayarın biçimine göre) dışa aktarır; iş bitince `teslim.json` yazar ve programı kapatır
+//! - Akış kipinde Dışa Aktar penceresinde "Bitir ve TM AutoClip'e gönder": geçerli dışa aktarma ayarlarıyla (görünür altyazı izleri
+//!   her zaman yakılarak) oturumun beklenen çıktı yoluna (uzantı ayarın biçimine göre) dışa aktarır; iş bitince `teslim.json` yazar ve programı kapatır
 //!   (proje kaydedilmez — Craft akışında ayar saklanmaz; kaydedilmemiş değişiklik kurtarma günlüğünde kalır).
 //! - Düz kipte düğme GİZLİ. `craft-marka.json` linkleri (yalnız https) Yardım menüsünde Discord öğesinin YANINA eklenir.
 
@@ -90,6 +90,9 @@ fn baslat(app: &mut FilmcraftApp) -> Result<Value, String> {
     let yol = yol.with_extension(app.ui.export.settings.extension());
     let mut p = crate::panels::export_mode::export_params(app);
     p["path"] = json!(yol.to_string_lossy());
+    // Akışın altyazısı FilmCraft'ın altyazı izinde ("TM:altyazi"): gönderilen video yayına gider, altyazı videoda olmalı. Görünür
+    // (gözü açık) altyazı izleri yakılır; kullanıcı izi gizlerse ya da silerse yakılmaz.
+    p["burnCaptions"] = json!(true);
     let v = app.session.execute("file.exportMedia", p).map_err(|e| {
         log::error!("TM AutoClip: dışa aktarma başlamadı: {e}");
         e.to_string()
