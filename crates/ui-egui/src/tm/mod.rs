@@ -2,8 +2,9 @@
 //! `tm::kare`, `menus.rs` → menü öğeleri + çalıştırma, `panels/export_mode.rs` → düğme, `apps/filmcraft/src/main.rs` → kapı.
 //!
 //! - Akış kipinde Dışa Aktar penceresinde "Bitir ve TM AutoClip'e gönder": geçerli dışa aktarma ayarlarıyla (görünür altyazı izleri
-//!   her zaman yakılarak) oturumun beklenen çıktı yoluna (uzantı ayarın biçimine göre) dışa aktarır; iş bitince `teslim.json` yazar ve programı kapatır
-//!   (proje kaydedilmez — Craft akışında ayar saklanmaz; kaydedilmemiş değişiklik kurtarma günlüğünde kalır).
+//!   her zaman yakılarak) oturumun beklenen çıktı yoluna (uzantı ayarın biçimine göre) dışa aktarır; iş bitince `teslim.json` yazar ve programı kapatır.
+//!   Dışa aktarmadan ÖNCE proje kaydedilir (adım 6b, çift yön: TM AutoClip'in Düzenle'si projeyi okuyup kullanıcının burada yaptıklarını
+//!   kilitler ve korur; kaydedilmezse düzenlemeler kurtarma günlüğünde kalıp TM AutoClip'e görünmezdi).
 //! - Düz kipte düğme GİZLİ. `craft-marka.json` linkleri (yalnız https) Yardım menüsünde Discord öğesinin YANINA eklenir.
 
 pub mod oturum;
@@ -86,6 +87,11 @@ fn baslat(app: &mut FilmcraftApp) -> Result<Value, String> {
         return Err("TM AutoClip dışa aktarması zaten sürüyor".into());
     }
     let (_, yol) = o.cikti.clone().ok_or("oturumda çıktı yolu yok")?;
+    // Adım 6b: önce proje kaydedilir (açılan proje dosyasına) — çift yön eşitleyici kullanıcının düzenlemelerini projeden okur.
+    if let Err(e) = app.session.execute("file.save", json!({})) {
+        log::error!("TM AutoClip: proje kaydedilemedi: {e}");
+        return Err(format!("Proje kaydedilemedi: {e}"));
+    }
     // Kapsayıcı ayardaki biçime göre: beklenen yolun adı + ayarın uzantısı (teslim.json gerçek yolu bildirir).
     let yol = yol.with_extension(app.ui.export.settings.extension());
     let mut p = crate::panels::export_mode::export_params(app);
@@ -126,7 +132,7 @@ pub fn kare(app: &mut FilmcraftApp, ctx: &egui::Context) {
             match oturum::teslim_yaz(o, std::path::Path::new(&yol)) {
                 Ok(_) => {
                     app.ui.status = format!("TM AutoClip'e gönderildi: {yol}");
-                    // Proje kaydedilmez (Craft akışında ayar saklanmaz); kaydet sorusu çıkmasın.
+                    // Proje dışa aktarmadan önce kaydedildi; kaydet sorusu çıkmasın.
                     app.quit_confirmed = true;
                     ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                 }
