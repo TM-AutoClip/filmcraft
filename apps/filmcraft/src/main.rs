@@ -28,6 +28,7 @@ mod args;
 mod audio;
 mod audio_in;
 mod control_server;
+mod tm_kanal;
 #[cfg(target_os = "linux")]
 mod dev_icon;
 mod file_filters;
