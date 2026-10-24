@@ -316,6 +316,7 @@ impl FilmcraftApp {
         self.advance_playback(ctx);
         self.advance_source_playback(ctx);
         self.poll_jobs(ctx);
+        crate::tm::kare(self, ctx);
         capture::drain(self, ctx);
         capture::request_hidden_paint(self, ctx);
     }

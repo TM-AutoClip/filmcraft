@@ -34,6 +34,7 @@ mod dev_icon;
 mod file_filters;
 mod graphics;
 mod logging;
+mod tm;
 #[cfg(target_os = "macos")]
 mod native_menu;
 mod window_raise;
@@ -117,6 +118,8 @@ fn main() -> eframe::Result {
             }
         }
     }
+    // TM AutoClip yerel yaması: yalnız TM AutoClip oturumuyla açılır.
+    tm::kapi();
     app_nap::disable();
     #[cfg(target_os = "linux")]
     dev_icon::ensure_dev_desktop_entry();
