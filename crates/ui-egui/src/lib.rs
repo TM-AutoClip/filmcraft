@@ -61,6 +61,7 @@ pub mod source_playback;
 pub mod state;
 pub mod theme;
 mod theme_favorites;
+pub mod tm;
 pub mod widgets;
 
 use std::collections::HashMap;
@@ -2167,6 +2168,7 @@ impl eframe::App for FilmcraftApp {
         }
         let had_synthetic = !self.synthetic.is_empty();
         self.drain_control(ctx);
+        crate::tm::kare(self, ctx);
         if !self.synthetic.is_empty() && !had_synthetic {
             // Occluded macOS windows stop running `ui`; bring the window forward (without taking
             // keyboard focus) so the input is processed.

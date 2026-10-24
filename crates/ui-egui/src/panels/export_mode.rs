@@ -1166,6 +1166,7 @@ fn preview_column(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect, seq_id:
             Err(e) => app.ui.status = e.to_string(),
         }
     }
+    crate::tm::disa_aktar_dugmesi(app, ui, queue);
 }
 
 /// The export range in sequence ticks (for the summary).
