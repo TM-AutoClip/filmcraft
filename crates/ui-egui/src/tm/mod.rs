@@ -1,5 +1,5 @@
-//! TM AutoClip yerel yaması — FilmCraft (11 Eki 2026). Upstream'e dokunuş: `lib.rs` → `pub mod tm;` + her karede
-//! `tm::kare`, `menus.rs` → menü öğeleri + çalıştırma, `panels/export_mode.rs` → düğme, `apps/filmcraft/src/main.rs` → kapı.
+//! TM AutoClip yerel yaması — FilmCraft (11 Eki 2026). Upstream'e dokunuş: `lib.rs` → `pub mod tm;`, `app.rs` → her karede
+//! `tm::kare`, `menus.rs` → menü öğeleri + çalıştırma, `panels/export_mode/preview.rs` → düğme, `apps/filmcraft/src/main.rs` → kapı.
 //!
 //! - Akış kipinde Dışa Aktar penceresinde "Bitir ve TM AutoClip'e gönder": geçerli dışa aktarma ayarlarıyla (görünür altyazı izleri
 //!   her zaman yakılarak) oturumun beklenen çıktı yoluna (uzantı ayarın biçimine göre) dışa aktarır; iş bitince `teslim.json` yazar ve programı kapatır.
