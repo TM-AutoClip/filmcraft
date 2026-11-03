@@ -120,7 +120,7 @@ fn main() -> eframe::Result {
             }
         }
     }
-    // TM AutoClip yerel yaması: yalnız TM AutoClip oturumuyla açılır.
+    // TM AutoClip yerel yaması: verilen TM AutoClip oturumu geçersizse açılmaz (oturumsuz açılış serbest).
     tm::kapi();
     app_nap::disable();
     #[cfg(target_os = "linux")]
