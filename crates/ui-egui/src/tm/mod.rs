@@ -67,7 +67,7 @@ pub fn disa_aktar_dugmesi(app: &mut FilmcraftApp, ui: &mut egui::Ui, kuyruk: Rec
     let g = ui.painter().layout_no_wrap(etiket.clone(), Tokens::semibold(12.5), Color32::WHITE);
     let w = g.size().x + 28.0;
     let r = Rect::from_min_size(pos2(kuyruk.min.x - 10.0 - w, kuyruk.min.y), vec2(w, kuyruk.height()));
-    let resp = ui.interact(r, egui::Id::new("export-tm-gonder"), Sense::click());
+    let resp = ui.interact(r, egui::Id::unique("export-tm-gonder"), Sense::click());
     let renk = if suruyor { t.text_dim } else if resp.hovered() { t.accent_hover } else { t.accent };
     ui.painter().rect_filled(r, 15.0, renk);
     ui.painter().text(r.center(), Align2::CENTER_CENTER, &etiket, Tokens::semibold(12.5), Color32::WHITE);
