@@ -63,7 +63,7 @@ pub fn disa_aktar_dugmesi(app: &mut FilmcraftApp, ui: &mut egui::Ui, kuyruk: Rec
     let Some(o) = oturum::akis() else { return };
     let t = app.tokens;
     let etiket = o.metin("gonder", "Bitir ve TM AutoClip'e gönder").to_string();
-    let suruyor = bekleyen().is_some();
+    let suruyor = bekleyen().is_some() || TESLIM.lock().unwrap_or_else(std::sync::PoisonError::into_inner).is_some();
     let g = ui.painter().layout_no_wrap(etiket.clone(), Tokens::semibold(12.5), Color32::WHITE);
     let w = g.size().x + 28.0;
     let r = Rect::from_min_size(pos2(kuyruk.min.x - 10.0 - w, kuyruk.min.y), vec2(w, kuyruk.height()));
@@ -83,7 +83,7 @@ pub fn disa_aktar_dugmesi(app: &mut FilmcraftApp, ui: &mut egui::Ui, kuyruk: Rec
 /// Dışa aktarmayı oturumun çıktı yoluna başlatır.
 fn baslat(app: &mut FilmcraftApp) -> Result<Value, String> {
     let o = oturum::akis().ok_or("TM AutoClip akış oturumu yok")?;
-    if bekleyen().is_some() {
+    if bekleyen().is_some() || TESLIM.lock().unwrap_or_else(std::sync::PoisonError::into_inner).is_some() {
         return Err("TM AutoClip dışa aktarması zaten sürüyor".into());
     }
     let (_, yol) = o.cikti.clone().ok_or("oturumda çıktı yolu yok")?;
@@ -110,8 +110,42 @@ fn baslat(app: &mut FilmcraftApp) -> Result<Value, String> {
     Ok(v)
 }
 
-/// Her kare: süren dışa aktarma bittiyse teslim dosyasını yazar ve kapanır; hata verdiyse durumu bildirir.
+/// Arka planda yazılan teslim (4 Kas 2026: büyük videonun özeti arayüzü dondurmasın; bitince program kapanır).
+static TESLIM: Mutex<Option<std::thread::JoinHandle<Result<std::path::PathBuf, String>>>> = Mutex::new(None);
+
+/// Her kare: süren dışa aktarma bittiyse teslim dosyasını (arka planda) yazar ve kapanır; hata verdiyse durumu bildirir.
 pub fn kare(app: &mut FilmcraftApp, ctx: &egui::Context) {
+    let biten = {
+        let mut t = TESLIM.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        match t.take() {
+            Some(is) if is.is_finished() => Some(is.join()),
+            Some(is) => {
+                *t = Some(is);
+                ctx.request_repaint_after(std::time::Duration::from_millis(200));
+                return;
+            }
+            None => None,
+        }
+    };
+    if let Some(sonuc) = biten {
+        match sonuc {
+            Ok(Ok(_)) => {
+                app.ui.status = "TM AutoClip'e gönderildi".into();
+                // Proje dışa aktarmadan önce kaydedildi; kaydet sorusu çıkmasın.
+                app.quit_confirmed = true;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            Ok(Err(e)) => {
+                log::error!("TM AutoClip: {e}");
+                app.ui.status = e;
+            }
+            Err(_) => {
+                log::error!("TM AutoClip: teslim yazan iş çöktü");
+                app.ui.status = "TM AutoClip'e gönderilemedi".into();
+            }
+        }
+        return;
+    }
     let Some((is, yol)) = bekleyen().clone() else { return };
     let Some(job) = app.session.jobs.iter().find(|j| j.id == is) else {
         log::warn!("TM AutoClip: dışa aktarma işi {is} listede yok");
@@ -129,18 +163,9 @@ pub fn kare(app: &mut FilmcraftApp, ctx: &egui::Context) {
         Some(Ok(_)) => {
             *bekleyen() = None;
             let Some(o) = oturum::akis() else { return };
-            match oturum::teslim_yaz(o, std::path::Path::new(&yol)) {
-                Ok(_) => {
-                    app.ui.status = format!("TM AutoClip'e gönderildi: {yol}");
-                    // Proje dışa aktarmadan önce kaydedildi; kaydet sorusu çıkmasın.
-                    app.quit_confirmed = true;
-                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                }
-                Err(e) => {
-                    log::error!("TM AutoClip: {e}");
-                    app.ui.status = e;
-                }
-            }
+            app.ui.status = "TM AutoClip için çıktı doğrulanıyor…".into();
+            *TESLIM.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = Some(oturum::teslim_arka_planda(o, std::path::PathBuf::from(&yol)));
+            ctx.request_repaint_after(std::time::Duration::from_millis(200));
         }
     }
 }
