@@ -1,5 +1,6 @@
 //! TM AutoClip yerel yaması — FilmCraft (11 Eki 2026). Upstream'e dokunuş: `lib.rs` → `pub mod tm;`, `app.rs` → her karede
-//! `tm::kare`, `menus.rs` → menü öğeleri + çalıştırma, `panels/export_mode/preview.rs` → düğme, `apps/filmcraft/src/main.rs` → kapı.
+//! `tm::kare`, `menus.rs` → menü öğeleri + çalıştırma, `panels/export_mode/preview.rs` → düğme, `apps/filmcraft/src/main.rs` → kapı,
+//! `panels/monitor.rs` → program monitöründe Düzenle ayarlarının kılavuzu ([`kilavuz`]; 5 Kas 2026, yalnız görüntüleyicide).
 //!
 //! - Akış kipinde Dışa Aktar penceresinde "Bitir ve TM AutoClip'e gönder": geçerli dışa aktarma ayarlarıyla (görünür altyazı izleri
 //!   her zaman yakılarak) oturumun beklenen çıktı yoluna (uzantı ayarın biçimine göre) dışa aktarır; iş bitince `teslim.json` yazar ve programı kapatır.
@@ -7,6 +8,7 @@
 //!   kilitler ve korur; kaydedilmezse düzenlemeler kurtarma günlüğünde kalıp TM AutoClip'e görünmezdi).
 //! - Düz kipte düğme GİZLİ. `craft-marka.json` linkleri (yalnız https) Yardım menüsünde Discord öğesinin YANINA eklenir.
 
+pub mod kilavuz;
 pub mod oturum;
 
 use std::sync::Mutex;
