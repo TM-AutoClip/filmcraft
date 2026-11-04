@@ -341,7 +341,8 @@ fn app_creator(launch: Launch, graphics: graphics::GraphicsStart, created: Arc<A
         app.hooks.clipboard_media = Some(Box::new(clipboard_media));
         // Settings ▸ General ▸ Interface Language ▸ System Language (#218).
         app.hooks.cursor_screen_position = Some(Box::new(filmcraft_platform::cursor::cursor_screen_position));
-        app.hooks.system_languages = Some(Box::new(|| sys_locale::get_locales().collect()));
+        // TM AutoClip yerel yamasi: TM AutoClip'ten acilinca "System Language" onun arayuz diline cozulur (TMAC_DIL).
+        app.hooks.system_languages = Some(Box::new(|| tm::sistem_dilleri(sys_locale::get_locales().collect())));
         // Settings ▸ Appearance ▸ Appearance Mode ▸ Sync with system on Linux desktops whose
         // compositor reports no theme to winit (no polling: see appearance.rs).
         app.hooks.system_theme = appearance::service();
