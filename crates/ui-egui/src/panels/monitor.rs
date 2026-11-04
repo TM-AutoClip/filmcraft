@@ -372,6 +372,8 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect, which: Which)
     }
     if show_picture {
         monitor_view::guides(app, ui, which, video_area, pic, frame_size);
+        // TM AutoClip yerel yamasi: Duzenle ayarlarinin kilavuzu (filigranin yeri) yalniz program monitorunde, yalniz goruntuleyicide.
+        crate::tm::kilavuz::monitor(ui, pic, frame_size, which == Which::Program);
     }
     ui.set_clip_rect(saved_clip);
     if let Some((top, left)) = ruler_rects {
